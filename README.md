@@ -29,11 +29,13 @@ There's no package registry entry yet. Copy `src/path-fence.ts` into your projec
 
 ## What it won't do
 
-It never touches the filesystem. There's no `stat`, no `readlink`, no `realpath` call anywhere in it, which means a symlink whose target lives somewhere else isn't followed and won't be caught here. Operating system level enforcement is the authority for symlink escapes, not this module.
-
-It can't stop code that bypasses it. Nothing forces a caller to run a path through this before reading it.
-
-Its credential patterns are substring and basename heuristics, not a scan of file contents. A credential saved under an unconventional filename in an unlisted directory passes straight through.
+- touch the filesystem, since there's no `stat`, `readlink` or `realpath` call in it,
+  so a symlink whose target lives elsewhere isn't followed and won't be caught here
+- replace operating system enforcement, which is the authority for symlink escapes
+- stop code that bypasses it, since nothing forces a caller to run a path through it first
+- scan file contents, since its credential patterns are substring and basename
+  heuristics, so a credential saved under an unconventional name in an unlisted
+  directory passes straight through
 
 ## How I tested it
 
@@ -58,4 +60,4 @@ Design decisions and what changed while building it: [docs/ADR.md](docs/ADR.md).
 
 ---
 
-This little tool is one of a handful I pulled out of my own day-to-day agent setup. I use them all myself, so when something breaks I usually notice fast. But if you spot something weird, or just want to ask how it works, open an issue. I read every one. More tools on my [GitHub profile](https://github.com/justin-rhee).
+This little tool is one of a handful I pulled out of my own day-to-day agent setup. I use them all myself, so when something breaks I usually notice fast. But if you run into any issues, or anything that looks off, open an issue. I read every one. More tools on my [GitHub profile](https://github.com/justin-rhee).
