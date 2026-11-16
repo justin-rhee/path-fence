@@ -1,11 +1,11 @@
 # path-fence
 
-[![tests](https://github.com/justin-rhee/path-fence/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/path-fence/actions/workflows/test.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+[![tests](https://github.com/justin-rhee/path-fence/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/path-fence/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/path-fence.svg)](https://www.npmjs.com/package/path-fence) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
 
 A small function your scripts call before reading a file, so a path that leads to your passwords or keys gets refused instead of opened.
 
 ```ts
-import { isDeniedRead, confineRead } from "./path-fence.ts";
+import { isDeniedRead, confineRead } from "path-fence";
 
 isDeniedRead("~/.ssh/id_ed25519");                                        // true
 isDeniedRead("~/projects/app/notes/../../../.ssh/id_ed25519");            // true: resolved before it's checked
@@ -23,7 +23,11 @@ The command that got past my first guard was `cat ~/.config/gh/hosts.yml`, a pla
 
 ## Install
 
-It isn't on a package registry yet. Copy `src/path-fence.ts` into your project: about 190 lines over `node:path`, no dependencies, under Node 22 or newer, which reads TypeScript directly. Check it with a `..` escape: a path walking out of an allowed root must come back denied.
+```sh
+npm install path-fence
+```
+
+Node 22 or newer. No dependencies, only `node:path`. It ships compiled JavaScript with type definitions. Rather vendor it? Copy `src/path-fence.ts` into your project instead: about 190 lines, and Node 22 reads TypeScript directly.
 
 ## How it works
 

@@ -1,14 +1,47 @@
 {
   "name": "path-fence",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fail-closed path checks that refuse credential-shaped reads before they happen",
   "type": "module",
-  "license": "MIT",
+  "main": "./dist/path-fence.js",
+  "types": "./dist/path-fence.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/path-fence.d.ts",
+      "import": "./dist/path-fence.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "bash tests/run.sh",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "security",
+    "paths",
+    "agent",
+    "credentials",
+    "typescript"
+  ],
   "author": "Justin Rhee",
-  "repository": { "type": "git", "url": "https://github.com/justin-rhee/path-fence.git" },
-  "engines": { "node": ">=22" },
-  "exports": { ".": "./src/path-fence.ts" },
-  "files": ["src", "README.md", "LICENSE", "SECURITY.md"],
-  "scripts": { "test": "bash tests/run.sh" },
-  "keywords": ["security", "paths", "agent", "credentials", "typescript"]
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justin-rhee/path-fence.git"
+  },
+  "homepage": "https://github.com/justin-rhee/path-fence#readme",
+  "bugs": "https://github.com/justin-rhee/path-fence/issues",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  }
 }
