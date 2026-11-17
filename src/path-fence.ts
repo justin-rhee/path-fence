@@ -85,6 +85,9 @@ export const CREDENTIAL_BASENAME_PATTERNS: readonly RegExp[] = [
   /^\.env\./i,
   /^\.netrc$/i,
   /^\.pgpass$/i,
+  /^\.npmrc$/i,
+  /^\.git-credentials$/i,
+  /^id_(rsa|dsa|ecdsa|ed25519)(_sk)?$/i,
   /^\.my\.cnf$/i,
   /^\..*webhook/i,
 ];
@@ -102,6 +105,17 @@ export const CREDENTIAL_DIRECTORY_MARKERS: readonly string[] = [
   "/secrets/",
   "/credentials/",
   "/keys/",
+  "/.config/gh/",
+];
+
+/**
+ * Exact files, written as a trailing run of path segments, that hold a
+ * token but sit in a folder that also holds harmless files, so the folder
+ * itself is not marked. Matched on whole segment boundaries, case
+ * insensitively.
+ */
+export const CREDENTIAL_FILE_SUFFIXES: readonly string[] = [
+  "/.docker/config.json",
 ];
 
 /**
@@ -121,9 +135,16 @@ function basenameOf(abs: string): string {
   return parts[parts.length - 1] ?? "";
 }
 
+// Folder and file names are matched case-insensitively because the default
+// macOS and Windows filesystems treat ~/.SSH and ~/.ssh as the same folder.
 function matchesSegmentMarker(abs: string, markers: readonly string[]): boolean {
-  const probe = abs.endsWith(sep) ? abs : abs + sep;
-  return markers.some((marker) => probe.includes(marker));
+  const probe = (abs.endsWith(sep) ? abs : abs + sep).toLowerCase();
+  return markers.some((marker) => probe.includes(marker.toLowerCase()));
+}
+
+function matchesFileSuffix(abs: string, suffixes: readonly string[]): boolean {
+  const lower = abs.toLowerCase();
+  return suffixes.some((suffix) => lower.endsWith(suffix.toLowerCase()));
 }
 
 export interface PathFenceOptions {
@@ -152,8 +173,9 @@ export function isDeniedRead(p: unknown, opts?: PathFenceOptions): boolean {
   const name = basenameOf(abs);
   if (CREDENTIAL_BASENAME_PATTERNS.some((re) => re.test(name))) return true;
   if (matchesSegmentMarker(abs, CREDENTIAL_DIRECTORY_MARKERS)) return true;
+  if (matchesFileSuffix(abs, CREDENTIAL_FILE_SUFFIXES)) return true;
   if (
-    CREDENTIAL_PLIST_DIRECTORY_MARKERS.some((marker) => abs.includes(marker)) &&
+    matchesSegmentMarker(abs, CREDENTIAL_PLIST_DIRECTORY_MARKERS) &&
     abs.toLowerCase().endsWith(".plist")
   ) {
     return true;

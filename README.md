@@ -9,7 +9,8 @@ import { isDeniedRead, confineRead } from "path-fence";
 
 isDeniedRead("~/.ssh/id_ed25519");                                        // true
 isDeniedRead("~/projects/app/notes/../../../.ssh/id_ed25519");            // true: resolved before it's checked
-isDeniedRead("~/.config/gh/hosts.yml", { extraMarkers: [".config/gh/"] }); // true: your own additions
+isDeniedRead("~/.config/gh/hosts.yml");                                   // true: the file from the story below
+isDeniedRead("~/notes/private/a.txt", { extraMarkers: ["/private/"] });   // true: your own additions
 confineRead("~/projects/app/../app-secrets/keys.txt", ["~/projects/app"]); // false: outside the root
 ```
 
@@ -27,7 +28,7 @@ The command that got past my first guard was `cat ~/.config/gh/hosts.yml`, a pla
 npm install path-fence
 ```
 
-Node 22 or newer. No dependencies, only `node:path`. It ships compiled JavaScript with type definitions. Rather vendor it? Copy `src/path-fence.ts` into your project instead: about 190 lines, and Node 22 reads TypeScript directly.
+Node 22 or newer. No dependencies, only `node:path`. It ships compiled JavaScript with type definitions. Rather vendor it? Copy `src/path-fence.ts` into your project instead: about 210 lines, and Node 22 reads TypeScript directly.
 
 ## How it works
 
@@ -39,7 +40,7 @@ The built-in patterns are exported as named constants, so you can see exactly wh
 
 ## What it won't do
 
-- cover `~/.config/gh/hosts.yml`, the file in the story above, by default; `extraMarkers: [".config/gh/"]` adds it, as in the example
+- match your own `extraMarkers` case-sensitively, since those are plain substring tests
 - follow a symlink, since it never touches the filesystem, so a link to a file elsewhere isn't caught here
 - replace operating system enforcement, which is the real authority for symlink escapes
 - stop code that skips it, since nothing forces a caller to use it, and a hostile process simply won't
@@ -48,7 +49,7 @@ The built-in patterns are exported as named constants, so you can see exactly wh
 
 ## How I tested it
 
-- 13 tests: `bash tests/run.sh`
+- 18 tests: `bash tests/run.sh`
 - the same file spelled three ways classifies identically, and a `..` escape lands outside an allowed root
 - one test shows a plain string comparison missing a `..` escape, then the real check catching it once the path is resolved; design decisions are in [docs/ADR.md](docs/ADR.md)
 
