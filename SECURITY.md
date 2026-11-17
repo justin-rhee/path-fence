@@ -14,10 +14,13 @@ promise the code can't keep.
 
 ## Validation status
 
-<State plainly whether this tool's tests / red-team corpus have been RUN, and
-link the results. An unrun corpus is disclosed here, in the open. never hidden
-behind a "tested" claim. Disclosure does not transfer the duty; run it before
-you rely on it.>
+The offline test suite has been run: 18 tests pass, 0 fail (`bash tests/run.sh`,
+Node 22). The tests check path canonicalization, the deny list (credential
+file names, credential folders, CLI token files, service definitions), case
+variants of those folders, and confinement to allowed roots. They do not cover
+symlinks, Windows paths, a path that spells a credential in a way the deny
+list has no pattern for, or any real filesystem behavior. There is no
+separate red-team corpus.
 
 ## Reporting a vulnerability
 

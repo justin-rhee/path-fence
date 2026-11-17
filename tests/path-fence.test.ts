@@ -93,3 +93,42 @@ test("without canonicalization: a naive prefix comparison on the raw string woul
 test("canonical treats a trailing separator as insignificant", () => {
   assert.equal(canonical("~/project/notes/"), canonical("~/project/notes"));
 });
+
+test("the GitHub CLI token file is denied by default", () => {
+  assert.ok(isDeniedRead("~/.config/gh/hosts.yml"));
+  assert.ok(isDeniedRead("~/.config/gh/hosts.yml/"));
+  assert.ok(!isDeniedRead("~/.config/ghostty/config"), "a sibling folder that only shares a prefix is not the marker");
+});
+
+test("other well-known CLI credential files are denied by default", () => {
+  assert.ok(isDeniedRead("~/.docker/config.json"));
+  assert.ok(isDeniedRead("~/.npmrc"));
+  assert.ok(isDeniedRead("~/.git-credentials"));
+  assert.ok(!isDeniedRead("~/.docker/contexts/meta.json"), "only the docker config file is listed, not the whole folder");
+  assert.ok(!isDeniedRead("~/projects/app/config.json"));
+});
+
+test("private key files are denied by name anywhere, public keys are not", () => {
+  for (const name of ["id_rsa", "id_ed25519", "id_ecdsa", "id_dsa", "id_ed25519_sk", "ID_RSA"]) {
+    assert.ok(isDeniedRead(`~/backup/${name}`), `${name} should be denied outside ~/.ssh`);
+  }
+  assert.ok(isDeniedRead("~/old-laptop/keys-copy/server.pem"), "pem files stay denied outside ~/.ssh");
+  assert.ok(!isDeniedRead("~/backup/id_rsa.pub"), "a public key is not a secret");
+  assert.ok(!isDeniedRead("~/backup/id_rsa_notes.txt"));
+});
+
+test("directory markers match case-insensitively", () => {
+  assert.ok(isDeniedRead("~/.SSH/config"));
+  assert.ok(isDeniedRead("~/.Aws/credentials"));
+  assert.ok(isDeniedRead("~/.GnuPG/pubring.kbx"));
+  assert.ok(isDeniedRead("~/x/Secrets/db.json"));
+  assert.ok(isDeniedRead("~/.Config/GH/hosts.yml"));
+  assert.ok(isDeniedRead("~/.DOCKER/Config.json"));
+  assert.ok(isDeniedRead("~/Library/launchagents/com.example.agent.plist"));
+  assert.ok(!isDeniedRead("~/.SSHX/notes.txt"), "still a whole segment match");
+});
+
+test("case-variant credentials are also refused by confineRead", () => {
+  assert.ok(!confineRead("~/.SSH/id_ed25519", ["~"]));
+  assert.ok(confineRead("~/project/notes.txt", ["~"]));
+});
